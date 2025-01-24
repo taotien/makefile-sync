@@ -1,0 +1,9 @@
+you'll need rust installed
+
+clone repo, cd into it
+
+`cargo install --path .`
+
+make sure ~/.cargo/bin is in your $PATH
+
+go to your xv6-riscv dir, run `makefile-sync`
