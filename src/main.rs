@@ -3,16 +3,26 @@ use std::{
     fs::{read_dir, read_to_string, write},
 };
 
+use anyhow::Context;
+
 const MF_PATH: &str = "Makefile";
 const USER_PATH: &str = "user";
 
 fn main() -> anyhow::Result<()> {
-    let mf = read_to_string(MF_PATH)?;
+    let mf = read_to_string(MF_PATH).context("could not find Makefile in current directory")?;
 
-    let (head, uprogs) = mf.split_at(mf.find("UPROGS").unwrap());
-    let (_uprogs, end) = uprogs.split_at(uprogs.find("fs.img").unwrap());
+    let (head, uprogs) = mf.split_at(
+        mf.find("UPROGS")
+            .context("could not find UPROGS in makefile")?,
+    );
+    let (_uprogs, end) = uprogs.split_at(
+        uprogs
+            .find("fs.img")
+            .context("could not find fs.img (end of block magic phrase) in Makefile")?,
+    );
 
-    let mut c_files: Vec<_> = read_dir(USER_PATH)?
+    let mut c_files: Vec<_> = read_dir(USER_PATH)
+        .context("could not find user dir")?
         .filter_map(|e| {
             let e = e.ok()?.path();
             if e.extension()? == "c"
